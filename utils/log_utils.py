@@ -21,13 +21,7 @@ def load_offsets(offset_file_path):
 def save_offsets(offset_file_path, offsets):
     with open(offset_file_path, 'w') as file:
         for filename, info in offsets.items():
-            file.write(f"{filename}\t{info['offset']}")
-
-def get_matching_device_id(filename, substrings):
-    for substring in substrings:
-        if substring in filename:
-            return substring
-    return None
+            file.write(f"{filename}\t{info['offset']}\n")
 
 
 def get_log_entries(log_dir, devices, offsets):
@@ -68,11 +62,11 @@ def get_log_entries(log_dir, devices, offsets):
     return entries
 
 
-
 def to_unix_timestamp(datetime_string):
     dt = datetime.strptime(datetime_string, '%Y-%m-%d %H:%M:%S')
     unix_timestamp_ms = int(dt.timestamp() * 1000)
     return unix_timestamp_ms
+
 
 def convert_to_message(device_id, line):
     timestamp, temperature, humidity, battery = line.split('\t')
@@ -95,24 +89,6 @@ def convert_to_message(device_id, line):
 log_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\s\d+(?:\.\d+)?\s\d+(?:\.\d+)?\s\d+$')
 def complies_format(line):
     return bool(log_pattern.match(line))
-
-
-
-def get_log_files(folder_path, search_strings):
-    matching_files = []
-
-    # Iterate over the files in the folder
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        
-        # Check if the current item is a file (not a directory)
-        if os.path.isfile(file_path):
-            # Check if any of the search strings are present in the filename
-            if any(string.lower() in filename.lower() for string in search_strings):
-                matching_files.append(file_path)
-    
-
-    return matching_files
 
 
 def get_device_log_files(folder_path, device):

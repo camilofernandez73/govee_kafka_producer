@@ -30,7 +30,7 @@
     "topic_name": "govee-temp-test",
     "log_dir": "./govee_files",
     "devices": [
-      "FAKEDEVICE"
+      "FAKEDEVICE","FAKE2DEVICE"
     ]
   }
 }
