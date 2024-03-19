@@ -3,3 +3,4 @@ __pycache__/
 .vscode/
 *.pyc
 file_offsets.txt
+sandbox.py
