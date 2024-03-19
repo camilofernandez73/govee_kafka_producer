@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 file_offsets.txt
 sandbox.py
+govee_files/*.txt

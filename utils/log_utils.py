@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import time
 import os
 import re
@@ -30,7 +30,6 @@ def get_matching_device_id(filename, substrings):
     return None
 
 
-
 def get_log_entries(log_dir, devices, offsets):
     entries = []
     
@@ -41,7 +40,7 @@ def get_log_entries(log_dir, devices, offsets):
         for file_name in sorted_files:
             file_path = os.path.join(log_dir, file_name)
             file_size = os.path.getsize(file_path)
-            offset_info = offsets.get(file_name, {'offset': 0, 'lastwritten': '1970-01-01 00:00:00'})
+            offset_info = offsets.get(file_name, {'offset': 0})
 
             with open(file_path, 'r') as file:
                 
@@ -70,9 +69,6 @@ def get_log_entries(log_dir, devices, offsets):
 
 
 
-
- 
-
 def to_unix_timestamp(datetime_string):
     dt = datetime.strptime(datetime_string, '%Y-%m-%d %H:%M:%S')
     unix_timestamp_ms = int(dt.timestamp() * 1000)
@@ -94,7 +90,6 @@ def convert_to_message(device_id, line):
     }
    # time.sleep(5)
     return message
-
 
 
 log_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\s\d+(?:\.\d+)?\s\d+(?:\.\d+)?\s\d+$')
@@ -120,7 +115,6 @@ def get_log_files(folder_path, search_strings):
     return matching_files
 
 
-
 def get_device_log_files(folder_path, device):
     matching_files = []
     
@@ -133,10 +127,7 @@ def get_device_log_files(folder_path, device):
     
     return matching_files
 
-
  
-
-
 def sort_files_by_last_written(folder_path, file_list, ascending=False):
     # Get the last written time for each file
     file_times = []
@@ -153,35 +144,22 @@ def sort_files_by_last_written(folder_path, file_list, ascending=False):
     
     # Extract and return the sorted list of filenames
     sorted_filenames = [filename for filename, _ in sorted_files]
+    
     return sorted_filenames
 
 
+def is_newer_than_milliseconds(date_string, milliseconds):
+    # Parse the date string into a datetime object
+    date = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
 
-def sort_files_by_last_written2(file_list):
-    # Get the last written time for each file
-    file_times = [(file_path, os.path.getmtime(file_path)) for file_path in file_list]
-    
-    # Sort the files based on the last written time in descending order
-    sorted_files = sorted(file_times, key=lambda x: x[1], reverse=True)
-    
-    # Extract the sorted file paths
-    sorted_file_paths = [file_path for file_path, _ in sorted_files]
-    
-    return sorted_file_paths
+    # Make the date timezone-aware by replacing the timezone with UTC
+    date = date.replace(tzinfo=timezone.utc)
 
+    # Get the current UTC time as a timezone-aware datetime object
+    current_time = datetime.now(timezone.utc)
 
+    # Calculate the time difference between the given date and the current time
+    time_diff = current_time - date
 
-
-
-def sort_files_by_last_written_old(file_list):
-    # Get the last written time for each file
-    file_times = [(file_path, os.path.getmtime(file_path)) for file_path in file_list]
-    
-    # Sort the files based on the last written time in descending order
-    sorted_files = sorted(file_times, key=lambda x: x[1], reverse=True)
-    
-    # Extract the sorted file paths
-    sorted_file_paths = [file_path for file_path, _ in sorted_files]
-    
-    return sorted_file_paths
-
+    # Check if the time difference is less than the specified number of milliseconds
+    return time_diff < timedelta(milliseconds=milliseconds)

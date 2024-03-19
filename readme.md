@@ -58,7 +58,7 @@ Creating a systemd service one of the most robust and common ways to ensure a Py
     Environment="GOVEE_KAFKA_PRODUCER_ENV=production"
     User=pi
     WorkingDirectory=/home/pi/path/to/your/script
-    ExecStart=/home/pi/path/to/your/venv/bin/python path/to/your/script/main.py
+    ExecStart=/home/pi/path/to/your/venv/bin/python path/to/your/script/main.py kafka
     Restart=always
     RestartSec=30
 

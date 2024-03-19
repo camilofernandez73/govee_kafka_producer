@@ -3,7 +3,7 @@ import os
 import time
 import sys
 from kafka.errors import KafkaError
-from utils.log_utils import  load_offsets, get_log_entries, save_offsets
+from utils.log_utils import  load_offsets, get_log_entries, save_offsets, is_newer_than_milliseconds
 from utils.kafka_utils import try_create_producer, send_to_kafka
 from utils.config_manager import load_config 
 import logging
@@ -31,8 +31,11 @@ def main(mode, skip_offset):
     log_dir = config['log_dir']
     devices = config['devices']
     iteration_delay = config['iteration_delay']
-
+    skip_older_entries_ms= config['skip_older_entries_ms']
+    
     offset_file = os.path.join(script_dir, 'file_offsets.txt')
+   
+    
    
 
     # Kafka producer configuration
@@ -75,9 +78,15 @@ def main(mode, skip_offset):
                     line = entry["line"]
                     logging.debug(f"Sending... ({entry_index}/{total_entries}) : {entry['message']}")
           
-                    if kafka_enabled:
+          
+                    entry_ts = entry['message']['value']["timestamp"]
+                    is_current =  is_newer_than_milliseconds(entry_ts, skip_older_entries_ms)
+                    
+                    if kafka_enabled and is_current:
                         send_to_kafka(producer, topic, message = entry['message'], future_timeout = config['future_timeout'])
-
+                    elif not is_current:
+                        logging.debug(f"Sending ({entry_index}/{total_entries}) aborted. Entry older than {skip_older_entries_ms} ms.")
+                    
                     if set_offset:
                         offsets[entry['filename']] = {
                             'offset': entry['offset'] + len(entry['line']) + 1,  # Assuming +1 for newline character
@@ -112,7 +121,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Kafka producer for Govee log files.")
 
     # optional arguments
-    parser.add_argument("-so", "--skipoffset", action="store_true", help="Skip tracking the offset of read files.")
+    parser.add_argument("-s", "--skipoffset", action="store_true", help="Skip tracking the offset of read files.")
        
     # positional arguments
     parser.add_argument("mode", type=str, choices=["kafka", "pass"], help="'kafka' will enable the producer, 'pass' will only go through without sending.")
