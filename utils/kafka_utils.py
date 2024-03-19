@@ -2,9 +2,10 @@ from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
 import time
 import json
+import logging
 
 
-def create_producer(bootstrap_servers, max_retries=9999, delay=10):
+def try_create_producer(producer_config, max_retries=9999, delay=10):
     """
     Attempts to create a KafkaProducer instance with retries.
 
@@ -18,18 +19,19 @@ def create_producer(bootstrap_servers, max_retries=9999, delay=10):
     """
     for attempt in range(1, max_retries + 1):
         try:
-            print(f"Attempt {attempt} to connect to Kafka...")
-            producer = KafkaProducer(bootstrap_servers=bootstrap_servers)
-            print("Kafka connection established.")
+            logging.info(f"Attempt {attempt} to connect to Kafka...")
+            producer = KafkaProducer(**producer_config)
+            logging.info("Kafka connection established.")
             return producer
         except NoBrokersAvailable:
-            print(f"Kafka server not available. Retrying in {delay} seconds...")
+            logging.error(f"Kafka server not available. Retrying in {delay} seconds...")
             time.sleep(delay)
-    print("Failed to connect to Kafka after several attempts.")
+    logging.critical("Failed to connect to Kafka after several attempts.")
     return None
 
 
 
+       
 def send_to_kafka(producer, topic, message, future_timeout=10):
     
     record_key = message['key'].encode('utf-8') if message['key'] is not None else None
@@ -40,4 +42,7 @@ def send_to_kafka(producer, topic, message, future_timeout=10):
 
     # Get record metadata of the message that was produced
     record_metadata = future.get(timeout=future_timeout)
-    print(f"Message sent to topic {record_metadata.topic}, partition {record_metadata.partition}, offset {record_metadata.offset}")
+    logging.debug(f"Message sent to topic {record_metadata.topic}, partition {record_metadata.partition}, offset {record_metadata.offset}")
+
+
+

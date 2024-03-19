@@ -1,0 +1,32 @@
+{
+  "ENV_KEY": "GOVEE_KAFKA_PRODUCER_ENV",
+
+  "production": {
+    "logging_level": "INFO",
+    "create_producer_max_retries": 9999,
+    "create_producer_retry_delay": 10,
+    "iteration_delay": 60,
+    "future_timeout": 10,
+    "bootstrap_servers": ["192.168.177.12:9093"],
+    "topic_name": "govee-temp",
+    "log_dir": "/var/log/goveebttemplogger",
+    "": [
+      "A4C138C6CA69",
+      "A4C1380B36C5",
+      "A4C1388BED5C",
+      "A4C13890C250",
+      "A4C1385448FD"
+    ]
+  },
+  "development": {
+    "logging_level": "DEBUG",
+    "create_producer_max_retries": 9999,
+    "create_producer_retry_delay": 10,
+    "iteration_delay": 10,
+    "future_timeout": 10,
+    "bootstrap_servers": ["192.168.177.12:9093"],
+    "topic_name": "govee-temp-test",
+    "log_dir": "./govee_files",
+    "devices": ["FAKEDEVICE"]
+  }
+}
