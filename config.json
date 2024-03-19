@@ -30,7 +30,7 @@
     "topic_name": "govee-temp-test",
     "log_dir": "./govee_files",
     "devices": [
-      "A4C138C6CA69"
+      "FAKEDEVICE"
     ]
   }
 }

@@ -57,14 +57,16 @@ def main(mode, skip_offset):
         if producer is None:
             sys.exit(1)  # Exit the entire program with a status code
     
-
+    
+    total_sended_since_start = 0
     try:
         while True:
         
+            total_sended = 0
             offsets = load_offsets(offset_file)
             entries = get_log_entries(log_dir, devices, offsets)
             total_entries = len(entries)
-          
+            
             if total_entries == 0:
                 logging.info(f"Nothing to send. Next try in {iteration_delay} seconds.")
 
@@ -72,7 +74,7 @@ def main(mode, skip_offset):
             # Process entries
             entry_index = 0
             for entry in entries:
-                entry_index += 1  
+                entry_index += 1    
                 try:
                     
                     line = entry["line"]
@@ -84,6 +86,8 @@ def main(mode, skip_offset):
                     
                     if kafka_enabled and is_current:
                         send_to_kafka(producer, topic, message = entry['message'], future_timeout = config['future_timeout'])
+                        total_sended += 1
+                        total_sended_since_start += 1
                     elif not is_current:
                         logging.debug(f"Sending ({entry_index}/{total_entries}) aborted. Entry older than {skip_older_entries_ms} ms.")
                     
@@ -103,7 +107,9 @@ def main(mode, skip_offset):
             
             if kafka_enabled:
                 producer.flush()
-                
+            
+            logging.info(f"Total sended batch/total: {total_sended}/{total_sended_since_start}.")
+            
             # Delay before the next iteration
             time.sleep(iteration_delay)
 
