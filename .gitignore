@@ -3,5 +3,6 @@ __pycache__/
 .vscode/
 *.pyc
 file_offsets.txt
+offsets_v1.db
 sandbox.py
 govee_files/*.txt

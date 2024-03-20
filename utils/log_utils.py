@@ -1,27 +1,7 @@
 from datetime import datetime, timedelta, timezone
-import time
 import os
 import re
 import logging
-
-def load_offsets(offset_file_path):
-    offsets = {}
-    try:
-        with open(offset_file_path, 'r') as file:
-            for line in file:
-                parts = line.strip().split('\t')
-                if len(parts) == 2:
-                    offsets[parts[0]] = {'offset': int(parts[1])}
-    except FileNotFoundError as e:
-        logging.error(e)
-        pass
-    return offsets
-
-
-def save_offsets(offset_file_path, offsets):
-    with open(offset_file_path, 'w') as file:
-        for filename, info in offsets.items():
-            file.write(f"{filename}\t{info['offset']}\n")
 
 
 def get_log_entries(log_dir, devices, offsets):
@@ -34,7 +14,7 @@ def get_log_entries(log_dir, devices, offsets):
         for file_name in sorted_files:
             file_path = os.path.join(log_dir, file_name)
             file_size = os.path.getsize(file_path)
-            offset_info = offsets.get(file_name, {'offset': 0})
+            offset_info = offsets.get(file_name, {'offset': 0, 'lastwritten': '1970-01-01 00:00:00'})
 
             with open(file_path, 'r') as file:
                 
@@ -49,7 +29,7 @@ def get_log_entries(log_dir, devices, offsets):
                         logging.error(f"Line: '{line}'")
                         continue
                     
-                    logging.debug(f"Read line of {file_name} at position {current_position}/{file_size}.")
+                    # logging.debug(f"Read line of {file_name} at position {current_position}/{file_size}.")
                   
                     entries.append({
                         'device_id': device,

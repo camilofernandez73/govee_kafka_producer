@@ -24,7 +24,7 @@ def try_create_producer(producer_config, max_retries=9999, delay=10):
             logging.info("Kafka connection established.")
             return producer
         except NoBrokersAvailable:
-            logging.error(f"Kafka server not available. Retrying in {delay} seconds...")
+            logging.error(f"Kafka server not available. Retrying in {delay} seconds...",exc_info=True)
             time.sleep(delay)
     logging.critical("Failed to connect to Kafka after several attempts.")
     return None
@@ -32,7 +32,7 @@ def try_create_producer(producer_config, max_retries=9999, delay=10):
 
 
        
-def send_to_kafka(producer, topic, message, future_timeout=10):
+def send_to_kafka2(producer, topic, message, future_timeout=10):
     
     record_key = message['key'].encode('utf-8') if message['key'] is not None else None
     record_value = json.dumps( message['value']).encode('utf-8')
@@ -45,4 +45,15 @@ def send_to_kafka(producer, topic, message, future_timeout=10):
     logging.debug(f"Message sent to topic {record_metadata.topic}, partition {record_metadata.partition}, offset {record_metadata.offset}")
 
 
+def on_send_success(record_metadata):
+    logging.debug(f"Message sent to topic {record_metadata.topic}, partition {record_metadata.partition}, offset {record_metadata.offset}")
 
+def on_send_error(exception):
+    logging.error(f"Error sending message: {exception}")
+        
+def send_to_kafka(producer, topic, message):
+    record_key = message['key'].encode('utf-8') if message['key'] is not None else None
+    record_value = json.dumps(message['value']).encode('utf-8')
+    record_timestamp = message['timestamp']
+    
+    producer.send(topic, value=record_value, key=record_key, timestamp_ms=record_timestamp).add_callback(on_send_success).add_errback(on_send_error)
