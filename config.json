@@ -6,7 +6,7 @@
     "skip_older_entries_ms": 86400000,
     "create_producer_max_retries": 9999,
     "create_producer_retry_delay": 10,
-    "iteration_delay": 60,
+    "iteration_delay": 5,
     "bootstrap_servers": ["192.168.177.12:9093"],
     "topic_name": "govee-temp",
     "log_dir": "/var/log/goveebttemplogger",

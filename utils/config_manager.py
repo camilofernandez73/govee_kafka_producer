@@ -2,22 +2,23 @@ import json
 import os
 import logging
 
+
 def load_config():
-    config_path = 'config.json'
+    config_path = "config.json"
 
     try:
         with open(config_path) as config_file:
             config = json.load(config_file)
 
-        default_logging_level = config.get('logging_level', 'INFO')
+        default_logging_level = config.get("logging_level", "INFO")
         env_key = config.get("ENV_KEY")
-        env = os.getenv(env_key, 'development')
+        env = os.getenv(env_key, "development")
         env_config = config.get(env)
 
         if not env_config:
             raise ValueError(f"Configuration for environment {env} not found.")
 
-        logging_level = env_config.get('logging_level', default_logging_level)
+        logging_level = env_config.get("logging_level", default_logging_level)
         logging.getLogger().setLevel(logging.getLevelName(logging_level))
         logging.debug(f"Environment set to '{env}'.")
 

@@ -29,7 +29,7 @@ Principalmente diseñado para realizar pruebas de carga en un servidor Kafka en 
     ```
 5. **Running Application:**
     ```
-    /home/pi/projects/govee_kafka_producer/venv/bin/python /home/pi/projects/govee_kafka_producer/main_producer.py
+    /home/pi/projects/govee_kafka_producer/venv/bin/python /home/pi/projects/govee_kafka_producer/main.py
     ```
 
 
